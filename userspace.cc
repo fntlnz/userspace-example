@@ -21,4 +21,10 @@ int main(int argc, char const *argv[]) {
   if (res < 0) {
     return res;
   }
+
+  res = udig_alloc_ring_descriptors(&g_ring_descs_fd, &g_ring_info,
+                                    &g_ring_status, g_console_print_buf);
+  if (res < 0) {
+    return res;
+  }
 }
