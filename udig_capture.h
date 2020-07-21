@@ -41,7 +41,7 @@ int accumulate_argv_or_env(const char __user *__user *argv, char *str_storage,
 static __inline__ uint8_t *patch_pointer(uint8_t *pointer) { return pointer; }
 
 static __inline__ long syscall_get_return_value(void *task, uint64_t *regs) {
-  return 0; // TODO(fntlnz): do some return magic here
+  return regs[7]; // CTX_RETVAL
 }
 
 int udig_getsockname(int fd, struct sockaddr *sock_address, socklen_t *alen);
