@@ -1,30 +1,38 @@
 
 #include "userspace_types.h"
 
-#include "ppm_ringbuffer.h"
 #include "scap.h"
-#include <sys/user.h>
 
-static struct udig_ring_buffer_status *g_ring_status = NULL;
-static struct ppm_ring_buffer_info *g_ring_info = NULL;
-static uint8_t *g_ring = NULL;
-int g_ring_fd = -1;
-uint32_t g_ringsize = 0;
-char g_console_print_buf[256];
-int g_ring_descs_fd = -1;
-static char g_str_storage[PAGE_SIZE];
+#include <stdio.h>
+#include <sys/time.h>
+#include <sys/user.h>
+#include <time.h>
+#include <unistd.h>
+
+#include "userspace_compat.h"
+
+static constexpr const uint64_t NSEC_PER_SEC = 1000000000;
+
+static uint64_t gettimeofday_ns() {
+  struct timeval tv;
+  gettimeofday(&tv, nullptr);
+
+  return tv.tv_sec * NSEC_PER_SEC + tv.tv_usec * 1000;
+}
 
 int main(int argc, char const *argv[]) {
+  userspace_init();
+  // send 10 events and exit
+  for (size_t i = 0; i < 10; i++) {
 
-  int res;
-  res = udig_alloc_ring(&g_ring_fd, &g_ring, &g_ringsize, g_console_print_buf);
-  if (res < 0) {
-    return res;
+    uint64_t now = gettimeofday_ns();
+    int res = example_event(now);
+    if (res != PPM_SUCCESS) {
+      printf("error firing event, res: %d", res);
+      continue;
+    }
+    printf("event generated, waiting to generate another one\n");
+    sleep(3);
   }
-
-  res = udig_alloc_ring_descriptors(&g_ring_descs_fd, &g_ring_info,
-                                    &g_ring_status, g_console_print_buf);
-  if (res < 0) {
-    return res;
-  }
+  return 0;
 }
