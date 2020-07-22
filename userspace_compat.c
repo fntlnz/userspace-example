@@ -74,17 +74,22 @@ int userspace_init() {
   return 0;
 }
 
+// This must be implemented to copy data structures in the fillers to userspace
+// We are always in userspace here so we don't really need to copy anything
+// but a memcpy will do.
 unsigned long ppm_copy_from_user(void *to, const void *from, unsigned long n) {
-  // TODO(fnltnz): verify if this is enough when we don't really copy anything
   memcpy(to, from, n);
   return n;
 }
 
+// This must be implemented to copy strings from userspace, again we are always
+// in userspace here so a plain memcpy will do..
 long ppm_strncpy_from_user(char *to, const char *from, unsigned long n) {
-  return strlcpy(to, from,
-                 n); // TODO: debug why the strlcpy below is wrong in some cases
+  // TODO: debug why the strlcpy below is wrong in some cases
+  return strlcpy(to, from, n);
 }
 
+// this is needed in val_to_ring to deal with copying PT_FSPATH types
 size_t strlcpy(char *dst, const char *src, size_t size) {
   const size_t srclen = strlen(src);
   if (srclen + 1 < size) {
@@ -96,18 +101,23 @@ size_t strlcpy(char *dst, const char *src, size_t size) {
   return srclen;
 }
 
+// This needs to be implemented to get the socket name
 int udig_getsockname(int fd, struct sockaddr *sock_address, socklen_t *alen) {
   return 0;
 }
 
+// This is used to extract socket peer name for AF_INET* families
 int udig_getpeername(int fd, struct sockaddr *sock_address, socklen_t *alen) {
   return 0;
 }
 
+// This is called to compute the snaplen
+// Question: only for that?
 void ppm_syscall_get_arguments(void *task, uint64_t *regs, uint64_t *args) {
   memcpy(args, regs + CTX_ARGS_BASE, 6 * sizeof(uint64_t));
 }
 
+// this is called by the fillers to get the arguments
 void syscall_get_arguments_deprecated(void *task, uint64_t *regs,
                                       uint32_t start, uint32_t len,
                                       uint64_t *args) {
