@@ -75,11 +75,14 @@ int userspace_init() {
 }
 
 unsigned long ppm_copy_from_user(void *to, const void *from, unsigned long n) {
-  return 0; // TODO(fntlnz): implement copy from user
+  // TODO(fnltnz): verify if this is enough when we don't really copy anything
+  memcpy(to, from, n);
+  return n;
 }
 
 long ppm_strncpy_from_user(char *to, const char *from, unsigned long n) {
-  return 0; // TODO(fntlnz): implement this
+  return strlcpy(to, from,
+                 n); // TODO: debug why the strlcpy below is wrong in some cases
 }
 
 size_t strlcpy(char *dst, const char *src, size_t size) {
@@ -102,7 +105,7 @@ int udig_getpeername(int fd, struct sockaddr *sock_address, socklen_t *alen) {
 }
 
 void ppm_syscall_get_arguments(void *task, uint64_t *regs, uint64_t *args) {
-  // TODO
+  memcpy(args, regs + CTX_ARGS_BASE, 6 * sizeof(uint64_t));
 }
 
 void syscall_get_arguments_deprecated(void *task, uint64_t *regs,
@@ -115,10 +118,13 @@ void syscall_get_arguments_deprecated(void *task, uint64_t *regs,
   memcpy(args, regs + CTX_ARGS_BASE + start, len * sizeof(uint64_t));
 }
 
-int udig_proc_startupdate(struct event_filler_arguments *args) {
-  // TODO
-  return 0;
-}
+// This gets called by the startupdate filler so that we have an hook
+// point for when a process creating syscall (clone, exec) is being called.
+//
+// we don't really do this since we are just mocking the functionalities.
+// If we were dealing with a real process tree we would need to implement this
+// to track all the child processes
+int udig_proc_startupdate(struct event_filler_arguments *args) { return 0; }
 
 int example_event(uint64_t timestamp) {
   int next;
@@ -127,22 +133,23 @@ int example_event(uint64_t timestamp) {
   uint32_t freespace;
   uint32_t delta_from_end;
 
+  const char oldpath[10] = "/tmp/yolo\0";
+  const char newpath[10] = "/tmp/yolo\0";
   // fill the context
   // this is usually done by looking at
   // registers from rdi to r9
   // in our case we just choose the values we want to send
   // for every argument of the syscall
   uint64_t context[CTX_SIZE] = {0};
-  context[CTX_ARG0] = -100; // rdi
-  context[CTX_ARG1] =
-      (uint8_t *)"example"; // rsi //TODO(fntlnz):verify if this works
-  context[CTX_ARG2] = -100; // rdx
-  context[CTX_ARG3] = (uint8_t *)"example"; // r10
+  context[CTX_ARG0] = -100;                 // rdi
+  context[CTX_ARG1] = (uint64_t)oldpath;    // rsi
+  context[CTX_ARG2] = -100;                 // rdx
+  context[CTX_ARG3] = (uint64_t)newpath;    // r10
   context[CTX_ARG4] = 0;                    // r8
   context[CTX_ARG5] = 0;                    // r9
   context[CTX_SYSCALL_ID] = __NR_renameat2; // syscall_id (orig_rax)
   context[CTX_RETVAL] = 0;                  // retval (rax)
-  context[CTX_PID_TID] = 1234;              // pid tid
+  context[CTX_PID_TID] = 218518;            // pid tid
 
   // fill event data
   struct event_data_t event_data;
