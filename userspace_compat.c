@@ -15,7 +15,7 @@
 #include <sys/uio.h>
 #include <sys/user.h>
 #include <sys/wait.h>
-#include <syscall.h>
+
 #include <time.h>
 
 #include <unistd.h>
@@ -42,22 +42,6 @@ uint32_t g_ringsize = 0;
 char g_console_print_buf[256];
 int g_ring_descs_fd = -1;
 static char g_str_storage[PAGE_SIZE];
-
-#ifndef MIN
-#define MIN(X, Y) ((X) < (Y) ? (X) : (Y))
-#endif
-
-#define CTX_ARG0 0
-#define CTX_ARG1 1
-#define CTX_ARG2 2
-#define CTX_ARG3 3
-#define CTX_ARG4 4
-#define CTX_ARG5 5
-#define CTX_SYSCALL_ID 6
-#define CTX_RETVAL 7
-#define CTX_PID_TID 8
-#define CTX_ARGS_BASE CTX_ARG0
-#define CTX_SIZE (CTX_PID_TID + 1)
 
 int userspace_init() {
   int res;
@@ -132,44 +116,26 @@ void syscall_get_arguments_deprecated(void *task, uint64_t *regs,
 // to track all the child processes
 int udig_proc_startupdate(struct event_filler_arguments *args) { return 0; }
 
-int example_event(uint64_t timestamp) {
+// Fire event facility
+int fire_event(uint64_t context[CTX_SIZE], uint16_t event_id,
+               uint64_t timestamp) {
   int next;
   uint32_t head;
   size_t event_size = 0;
   uint32_t freespace;
   uint32_t delta_from_end;
 
-  const char oldpath[] = "/tmp/oldpath";
-  const char newpath[] = "/tmp/newpath";
-  // fill the context
-  // this is usually done by looking at
-  // registers from rdi to r9
-  // in our case we just choose the values we want to send
-  // for every argument of the syscall
-  uint64_t context[CTX_SIZE] = {0};
-
-  context[CTX_ARG0] = -100;                 // rdi
-  context[CTX_ARG1] = (uint64_t)oldpath;    // rsi
-  context[CTX_ARG2] = -100;                 // rdx
-  context[CTX_ARG3] = (uint64_t)newpath;    // r10
-  context[CTX_ARG4] = 0;                    // r8
-  context[CTX_ARG5] = 0;                    // r9
-  context[CTX_SYSCALL_ID] = __NR_renameat2; // syscall_id (orig_rax)
-  context[CTX_RETVAL] = 0;                  // retval (rax)
-  context[CTX_PID_TID] = getpid();          // pid tid
-
   // fill event data
   struct event_data_t event_data;
   event_data.category = PPMC_SYSCALL;
   event_data.event_info.syscall_data.regs = context;
-  event_data.event_info.syscall_data.id = __NR_renameat2;
+  event_data.event_info.syscall_data.id = context[CTX_SYSCALL_ID];
   uint16_t ppm_event_id = PPME_SYSCALL_RENAMEAT2_X;
   event_data.event_info.syscall_data.cur_g_syscall_code_routing_table =
       g_syscall_code_routing_table;
   event_data.compat = false;
 
-  // prepare the event and insert
-
+  // prepare the event headers
   struct udig_consumer_t *consumer = &(g_ring_status->m_consumer);
   g_ring_info->n_evts++;
   head = g_ring_info->head;
@@ -199,7 +165,6 @@ int example_event(uint64_t timestamp) {
   hdr->len = event_size;
 
   // populate args for filler callback
-
   args.consumer = consumer;
   args.buffer = (char *)(g_ring + head + sizeof(struct ppm_evt_hdr));
   args.buffer_size =
