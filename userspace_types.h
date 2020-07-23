@@ -5,10 +5,6 @@
 
 /* kernel type definitions that are missing in userspace */
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 typedef uint8_t u8;
 typedef uint16_t u16;
 typedef uint32_t u32;
@@ -23,10 +19,6 @@ typedef uint16_t __u16;
 typedef uint32_t __u32;
 typedef unsigned long long __u64;
 
-#ifdef __cplusplus
-}
-#endif
-
 #define ASSERT(X)
 
-#endif
+#endif // USERSPACE_TYPES_H

@@ -2,14 +2,13 @@
 
 #include "userspace_types.h"
 
+#include "ppm_events.h"
+#include "ppm_events_public.h"
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <sys/socket.h>
 #include <sys/types.h>
-
-#include "ppm_events.h"
-#include "ppm_events_public.h"
 
 #define likely(x) __builtin_expect(!!(x), 1)
 #define unlikely(x) __builtin_expect(!!(x), 0)

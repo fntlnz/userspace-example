@@ -11,13 +11,11 @@
 
 #include "userspace_compat.h"
 
-static constexpr const uint64_t NSEC_PER_SEC = 1000000000;
-
 static uint64_t gettimeofday_ns() {
   struct timeval tv;
-  gettimeofday(&tv, nullptr);
+  gettimeofday(&tv, NULL);
 
-  return tv.tv_sec * NSEC_PER_SEC + tv.tv_usec * 1000;
+  return tv.tv_sec * 1000000000 + tv.tv_usec * 1000;
 }
 
 int main(int argc, char const *argv[]) {
@@ -26,6 +24,7 @@ int main(int argc, char const *argv[]) {
   for (size_t i = 0; i < 10; i++) {
 
     uint64_t now = gettimeofday_ns();
+
     int res = example_event(now);
     if (res != PPM_SUCCESS) {
       printf("error firing event, res: %d", res);

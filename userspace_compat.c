@@ -85,8 +85,10 @@ unsigned long ppm_copy_from_user(void *to, const void *from, unsigned long n) {
 // This must be implemented to copy strings from userspace, again we are always
 // in userspace here so a plain memcpy will do..
 long ppm_strncpy_from_user(char *to, const char *from, unsigned long n) {
-  // TODO: debug why the strlcpy below is wrong in some cases
-  return strlcpy(to, from, n);
+  size_t srclen = strlen(from) + 1;
+  memcpy(to, from, srclen);
+  to[srclen - 1] = 0;
+  return srclen;
 }
 
 // this is needed in val_to_ring to deal with copying PT_FSPATH types
@@ -143,14 +145,15 @@ int example_event(uint64_t timestamp) {
   uint32_t freespace;
   uint32_t delta_from_end;
 
-  const char oldpath[10] = "/tmp/yolo\0";
-  const char newpath[10] = "/tmp/yolo\0";
+  const char oldpath[] = "/tmp/oldpath";
+  const char newpath[] = "/tmp/newpath";
   // fill the context
   // this is usually done by looking at
   // registers from rdi to r9
   // in our case we just choose the values we want to send
   // for every argument of the syscall
   uint64_t context[CTX_SIZE] = {0};
+
   context[CTX_ARG0] = -100;                 // rdi
   context[CTX_ARG1] = (uint64_t)oldpath;    // rsi
   context[CTX_ARG2] = -100;                 // rdx
@@ -159,7 +162,7 @@ int example_event(uint64_t timestamp) {
   context[CTX_ARG5] = 0;                    // r9
   context[CTX_SYSCALL_ID] = __NR_renameat2; // syscall_id (orig_rax)
   context[CTX_RETVAL] = 0;                  // retval (rax)
-  context[CTX_PID_TID] = 218518;            // pid tid
+  context[CTX_PID_TID] = getpid();          // pid tid
 
   // fill event data
   struct event_data_t event_data;
@@ -204,7 +207,7 @@ int example_event(uint64_t timestamp) {
   // populate args for filler callback
 
   args.consumer = consumer;
-  args.buffer = g_ring + head + sizeof(struct ppm_evt_hdr);
+  args.buffer = (char *)(g_ring + head + sizeof(struct ppm_evt_hdr));
   args.buffer_size =
       MIN(freespace, delta_from_end) - sizeof(struct ppm_evt_hdr);
   args.event_type = hdr->type;

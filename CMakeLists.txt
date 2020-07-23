@@ -8,9 +8,7 @@ endif()
 
 ADD_DEFINITIONS(-DUDIG)
 set(CMAKE_C_FLAGS_DEBUG "-Og -g -D_DEBUG -Wall")
-set(CMAKE_CXX_FLAGS_DEBUG "-Og -g -D_DEBUG -Wall")
 set(CMAKE_C_FLAGS_RELEASE "-O3 -DNDEBUG -Wall")
-set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG -Wall")
 
 if(NOT SYSDIG_DIR)
 	SET(SYSDIG_DIR ../sysdig)
@@ -22,7 +20,7 @@ include_directories(${SYSDIG_DIR}/userspace/common)
 include_directories(${SYSDIG_DIR}/userspace/libscap)
 
 add_executable(userspace-example
-    userspace.cc
+    main.c
     userspace_compat.c
     ${SYSDIG_DIR}/driver/dynamic_params_table.c
     ${SYSDIG_DIR}/driver/event_table.c
@@ -35,5 +33,3 @@ add_executable(userspace-example
 )
 
 target_link_libraries(userspace-example rt)
-
-set_property(TARGET userspace-example PROPERTY CXX_STANDARD 11)
