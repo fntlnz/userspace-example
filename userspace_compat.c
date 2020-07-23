@@ -34,14 +34,24 @@
 extern const struct ppm_event_info g_event_info[];
 extern const enum ppm_syscall_code g_syscall_code_routing_table[];
 
+// Ring buffer status
 static struct udig_ring_buffer_status *g_ring_status = NULL;
+
+// Ring buffer data structure properties
 static struct ppm_ring_buffer_info *g_ring_info = NULL;
+
+// Ring buffer pointer to /dev/shm/udig_buf
 static uint8_t *g_ring = NULL;
+
+// File descriptor for the ring buffer (g_ring)
 int g_ring_fd = -1;
+
+// File descriptor for buffer info (g_ring_info)
+int g_ring_descs_fd = -1;
+
 uint32_t g_ringsize = 0;
 
 char g_console_print_buf[256];
-int g_ring_descs_fd = -1;
 
 static char g_str_storage[PAGE_SIZE];
 
@@ -142,6 +152,8 @@ int fire_event(uint64_t context[CTX_SIZE], uint16_t event_id,
   g_ring_info->n_evts++;
   head = g_ring_info->head;
 
+  // create a local view on the g_ring buffer
+  // considering only the memory chunk needed for this event headers
   struct ppm_evt_hdr *hdr = (struct ppm_evt_hdr *)(g_ring + head);
   hdr->ts = timestamp;
 
@@ -168,6 +180,10 @@ int fire_event(uint64_t context[CTX_SIZE], uint16_t event_id,
 
   // populate args for filler callback
   args.consumer = consumer;
+
+  // create a local view on the g_ring_buffer
+  // for this event and its headers
+  // This is where we effectively map all the event data to the buffer chunk
   args.buffer = (char *)(g_ring + head + sizeof(struct ppm_evt_hdr));
   args.buffer_size =
       MIN(freespace, delta_from_end) - sizeof(struct ppm_evt_hdr);
@@ -187,11 +203,15 @@ int fire_event(uint64_t context[CTX_SIZE], uint16_t event_id,
   const struct ppm_event_entry *pe = &g_ppm_events[hdr->type];
   int cbres = pe->filler_callback(&args);
 
+  // retrieve the next chunck starting point
   next = head + event_size;
 
-  // memory barrier to sync memory to real memory
+  // memory barrier
+  // This is where the actual memory is flushed from
+  // the pointers here to the real memory device.
   __sync_synchronize();
 
+  // update the ring descs to start from the next chunk
   g_ring_info->head = next;
   return cbres;
 }
