@@ -129,8 +129,7 @@ void syscall_get_arguments_deprecated(void *task, uint64_t *regs,
 int udig_proc_startupdate(struct event_filler_arguments *args) { return 0; }
 
 // Fire event facility
-int fire_event(uint64_t context[CTX_SIZE], uint16_t event_id,
-               uint64_t timestamp) {
+int fire_event(uint64_t *context, uint16_t event_id, uint64_t timestamp) {
   int next;
   uint32_t head;
   size_t event_size = 0;
