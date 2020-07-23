@@ -4,6 +4,7 @@
 #include <sys/types.h>
 #include <sys/user.h>
 
+#include "userspace_compat.h"
 #include "userspace_types.h"
 
 // This is never used at user level, so it doesn't matter
@@ -41,7 +42,7 @@ int accumulate_argv_or_env(const char __user *__user *argv, char *str_storage,
 static __inline__ uint8_t *patch_pointer(uint8_t *pointer) { return pointer; }
 
 static __inline__ long syscall_get_return_value(void *task, uint64_t *regs) {
-  return regs[7]; // CTX_RETVAL
+  return regs[CTX_RETVAL];
 }
 
 int udig_getsockname(int fd, struct sockaddr *sock_address, socklen_t *alen);

@@ -39,8 +39,10 @@ static struct ppm_ring_buffer_info *g_ring_info = NULL;
 static uint8_t *g_ring = NULL;
 int g_ring_fd = -1;
 uint32_t g_ringsize = 0;
+
 char g_console_print_buf[256];
 int g_ring_descs_fd = -1;
+
 static char g_str_storage[PAGE_SIZE];
 
 int userspace_init() {
@@ -130,7 +132,7 @@ int fire_event(uint64_t context[CTX_SIZE], uint16_t event_id,
   event_data.category = PPMC_SYSCALL;
   event_data.event_info.syscall_data.regs = context;
   event_data.event_info.syscall_data.id = context[CTX_SYSCALL_ID];
-  uint16_t ppm_event_id = PPME_SYSCALL_RENAMEAT2_X;
+  uint16_t ppm_event_id = event_id;
   event_data.event_info.syscall_data.cur_g_syscall_code_routing_table =
       g_syscall_code_routing_table;
   event_data.compat = false;
@@ -187,7 +189,7 @@ int fire_event(uint64_t context[CTX_SIZE], uint16_t event_id,
 
   next = head + event_size;
 
-  // sync memory to real memory
+  // memory barrier to sync memory to real memory
   __sync_synchronize();
 
   g_ring_info->head = next;
