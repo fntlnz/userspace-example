@@ -92,23 +92,17 @@ long ppm_strncpy_from_user(char *to, const char *from, unsigned long n) {
 }
 
 // this is needed in val_to_ring to deal with copying PT_FSPATH types
-size_t strlcpy(char *dst, const char *src, size_t size) {
-  const size_t srclen = strlen(src);
-  if (srclen + 1 < size) {
-    memcpy(dst, src, srclen + 1);
-  } else if (size != 0) {
-    memcpy(dst, src, size - 1);
-    dst[size - 1] = '\0';
-  }
-  return srclen;
-}
+// TODO(fntlnz): implement this
+size_t strlcpy(char *dst, const char *src, size_t size) { return 0; }
 
 // This needs to be implemented to get the socket name
+// TODO(fntlnz): implement this
 int udig_getsockname(int fd, struct sockaddr *sock_address, socklen_t *alen) {
   return 0;
 }
 
 // This is used to extract socket peer name for AF_INET* families
+// TODO(fntlnz): implement this
 int udig_getpeername(int fd, struct sockaddr *sock_address, socklen_t *alen) {
   return 0;
 }
