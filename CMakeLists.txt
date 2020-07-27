@@ -6,7 +6,7 @@ if(NOT CMAKE_BUILD_TYPE)
     SET(CMAKE_BUILD_TYPE Release)
 endif()
 
-ADD_DEFINITIONS(-DUDIG)
+add_definitions(-DUDIG)
 set(CMAKE_C_FLAGS_DEBUG "-Og -g -D_DEBUG -Wall")
 set(CMAKE_C_FLAGS_RELEASE "-O3 -DNDEBUG -Wall")
 

@@ -6,21 +6,24 @@
 There is a direct memory mapping done via
 
 ```c
-  int res;
-  res = udig_alloc_ring(&g_ring_fd, &g_ring, &g_ringsize, g_console_print_buf);
-  if (res < 0) {
-    return res;
-  }
+int res;
+res = udig_alloc_ring(&g_ring_fd, &g_ring, &g_ringsize, g_console_print_buf);
+if (res == SCAP_FAILURE) {
+  return SCAP_FAILURE;
+}
 
-  res = udig_alloc_ring_descriptors(&g_ring_descs_fd, &g_ring_info,
-                                    &g_ring_status, g_console_print_buf);
-  if (res < 0) {
-    return res;
-  }
-  return 0;
+res = udig_alloc_ring_descriptors(&g_ring_descs_fd, &g_ring_info,
+                                  &g_ring_status, g_console_print_buf);
+if (res == SCAP_FAILURE) {
+  return SCAP_FAILURE;
+}
 ```
 
 Where the memory in process is mapped directly to the ring buffer descriptor via shm_open and mmap.
+
+When you do this, compile the program using `-DUDIG`, or in CMake use `add_definitions(-DUDIG)`.
+This is needed so that the program knows that it will need to act as a producer while dealing with the
+file descriptor allocation.
 
 
 ## Event flags
@@ -46,3 +49,4 @@ context[CTX_PID_TID] = getpid();          // pid tid
 
 ## Protocol layout
 
+TODO

@@ -9,6 +9,7 @@
 #include <syscall.h>
 #include <time.h>
 #include <unistd.h>
+#include <errno.h>
 
 #include "userspace_compat.h"
 
@@ -43,11 +44,17 @@ int fire_renameat2_x() {
 }
 
 int main(int argc, char const *argv[]) {
-  userspace_init();
+  char error_buf[256];
+  int res;
+  res = userspace_init(error_buf);
+  if (res == SCAP_FAILURE) {
+    printf("error initializing userspace data structures: %s - %s", error_buf, strerror(errno));
+    return 1;
+  }
 
-  int res = fire_renameat2_x();
+  res = fire_renameat2_x();
   if (res != PPM_SUCCESS) {
-    printf("error firing syscall, res: %d", res);
+    printf("error firing syscall: %s", error_buf);
     return 1;
   }
 

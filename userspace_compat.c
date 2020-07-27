@@ -41,6 +41,7 @@ static struct udig_ring_buffer_status *g_ring_status = NULL;
 static struct ppm_ring_buffer_info *g_ring_info = NULL;
 
 // Ring buffer pointer to /dev/shm/udig_buf
+// Depending on the actual kernel, this might also be an anon memfd (if PR #1234) gets merged.
 static uint8_t *g_ring = NULL;
 
 // File descriptor for the ring buffer (g_ring)
@@ -51,21 +52,19 @@ int g_ring_descs_fd = -1;
 
 uint32_t g_ringsize = 0;
 
-char g_console_print_buf[256];
-
 static char g_str_storage[PAGE_SIZE];
 
-int userspace_init() {
+int userspace_init(char *error) {
   int res;
-  res = udig_alloc_ring(&g_ring_fd, &g_ring, &g_ringsize, g_console_print_buf);
-  if (res < 0) {
-    return res;
+  res = udig_alloc_ring(&g_ring_fd, &g_ring, &g_ringsize, error);
+  if (res == SCAP_FAILURE) {
+    return SCAP_FAILURE;
   }
 
   res = udig_alloc_ring_descriptors(&g_ring_descs_fd, &g_ring_info,
-                                    &g_ring_status, g_console_print_buf);
-  if (res < 0) {
-    return res;
+                                    &g_ring_status, error);
+  if (res == SCAP_FAILURE) {
+    return SCAP_FAILURE;
   }
   return 0;
 }
