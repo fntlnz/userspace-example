@@ -32,17 +32,18 @@ typedef int __kernel_pid_t;
 
 void ppm_syscall_get_arguments(void *task, uint64_t *regs, uint64_t *args);
 void syscall_get_arguments_deprecated(void *task, uint64_t *regs,
-                                      uint32_t start, uint32_t len,
-                                      uint64_t *args);
+				      uint32_t start, uint32_t len,
+				      uint64_t *args);
 typedef struct event_filler_arguments event_filler_arguments;
 int udig_proc_startupdate(struct event_filler_arguments *args);
 int accumulate_argv_or_env(const char __user *__user *argv, char *str_storage,
-                           int available);
+			   int available);
 
 static __inline__ uint8_t *patch_pointer(uint8_t *pointer) { return pointer; }
 
-static __inline__ long syscall_get_return_value(void *task, uint64_t *regs) {
-  return regs[CTX_RETVAL];
+static __inline__ long syscall_get_return_value(void *task, uint64_t *regs)
+{
+	return regs[CTX_RETVAL];
 }
 
 int udig_getsockname(int fd, struct sockaddr *sock_address, socklen_t *alen);
@@ -59,5 +60,5 @@ int udig_getpeername(int fd, struct sockaddr *sock_address, socklen_t *alen);
 #define SOL_TCP 6
 
 unsigned long ppm_copy_from_user(void *to, const void __user *from,
-                                 unsigned long n);
+				 unsigned long n);
 long ppm_strncpy_from_user(char *to, const char __user *from, unsigned long n);

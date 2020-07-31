@@ -12,6 +12,7 @@ read the notes in this readme as an addition.
 - [x] Usage documentation
 - [ ] Protocol layout documentation
 - [ ] Document the file names and functions that needs to be implemented and why
+
 ## How to use
 
 **Compilation**
@@ -100,6 +101,43 @@ context[CTX_SYSCALL_ID] = __NR_renameat2; // 6
 context[CTX_RETVAL] = 0;                  // 7
 context[CTX_PID_TID] = getpid();          // 8
 ```
+
+## Files and function definitions
+
+To implement the userspace protocol as a producer you don't
+necessarily need to use [libscap](https://github.com/draios/sysdig/tree/dev/userspace/libscap).
+However, libscap provides a useful set of helpers to access the ring buffer we use to write events.
+
+This example project does things the libscap way.
+
+libscap also provides a complete set of fillers and architecture independent constants for syscall
+enter and exit directions.
+
+The files that you need to implement to use libscap in your userpace producer are two:
+
+**udig_inf.h**
+This is needed for the definition of the event data structure `event_data_t`.
+Implementors also have to define the `likely` and `unlikely` macros as well a
+string copy and concatenation function with this signature:
+
+```
+size_t strlcpy(char *dst, const char *src, size_t size);
+```
+
+You can find the full example in [udig_inf.h](/udig_inf.h).
+
+**udig_capture.h**
+
+This is used by the fillers and events.
+A definition of all the functions and macros that need to be defined
+can be found in [udig_capture.h](udig_capture.h).
+
+Those functions are used directly in the fillers and in event processing functions
+to enrich the event and do conversions.
+
+For example, the `syscall_get_arguments_deprecated` is used to retrieve syscall arguments.
+In our example retrieving syscall arguments is very easy, we just need to `memcpy` them to
+the final pointer.
 
 ## Protocol layout
 

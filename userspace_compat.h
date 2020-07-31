@@ -18,6 +18,6 @@
 
 int userspace_init();
 int fire_event(uint64_t context[CTX_SIZE], uint16_t event_id,
-               uint64_t timestamp);
+	       uint64_t timestamp);
 
 #endif // USERSPACE_COMPAT_H
