@@ -1,5 +1,7 @@
 # Userspace Instrumentation
 
+[![asciicast](https://asciinema.org/a/NHJjt3373FS1vDSWQrKosw9x0.svg)](https://asciinema.org/a/NHJjt3373FS1vDSWQrKosw9x0)
+
 This is a repository where we're trying to document and share
 a working producer implementation for the userspace instrumentation protocol.
 
@@ -116,6 +118,7 @@ enter and exit directions.
 The files that you need to implement to use libscap in your userpace producer are two:
 
 **udig_inf.h**
+
 This is needed for the definition of the event data structure `event_data_t`.
 Implementors also have to define the `likely` and `unlikely` macros as well a
 string copy and concatenation function with this signature:
