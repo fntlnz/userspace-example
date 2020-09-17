@@ -1,3 +1,5 @@
+#ifndef UDIG_INF_H
+#define UDIG_INF_H
 #include <sys/types.h>
 
 #include "userspace_types.h"
@@ -30,3 +32,4 @@ struct event_data_t
 };
 
 size_t strlcpy(char *dst, const char *src, size_t size);
+#endif

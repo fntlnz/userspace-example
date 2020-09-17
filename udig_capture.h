@@ -1,3 +1,5 @@
+#ifndef UDIG_CAPTURE_H
+#define UDIG_CAPTURE_H
 #include <linux/quota.h>
 #include <sys/resource.h>
 #include <sys/socket.h>
@@ -62,3 +64,4 @@ int udig_getpeername(int fd, struct sockaddr *sock_address, socklen_t *alen);
 unsigned long ppm_copy_from_user(void *to, const void __user *from,
 				 unsigned long n);
 long ppm_strncpy_from_user(char *to, const char __user *from, unsigned long n);
+#endif

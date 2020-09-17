@@ -22,6 +22,7 @@ include_directories(${SYSDIG_DIR}/userspace/libscap)
 add_executable(userspace-example
     main.c
     userspace_compat.c
+    pmon.c
     ${SYSDIG_DIR}/driver/dynamic_params_table.c
     ${SYSDIG_DIR}/driver/event_table.c
     ${SYSDIG_DIR}/driver/flags_table.c
