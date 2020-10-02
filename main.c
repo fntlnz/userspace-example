@@ -11,6 +11,9 @@
 #include <time.h>
 #include <unistd.h>
 
+
+#include <scap-int.h>
+
 #include "userspace_compat.h"
 
 static uint64_t gettimeofday_ns()
@@ -42,7 +45,7 @@ int fire_renameat_x()
 	context[CTX_RETVAL] = 0;		 // retval (rax)
 	context[CTX_PID_TID] = getpid();	 // pid tid
 
-	return fire_event(context, PPME_SYSCALL_RENAMEAT_X, gettimeofday_ns());
+	return fire_event(context, PPME_SYSCALL_RENAMEAT_X, gettimeofday_ns(), g_ppm_events);
 }
 
 int main(int argc, char const *argv[])

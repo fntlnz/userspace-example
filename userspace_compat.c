@@ -137,7 +137,7 @@ void syscall_get_arguments_deprecated(void *task, uint64_t *regs,
 int udig_proc_startupdate(struct event_filler_arguments *args) { return 0; }
 
 // Fire event facility
-int fire_event(uint64_t *context, uint16_t event_id, uint64_t timestamp)
+int fire_event(uint64_t *context, uint16_t event_id, uint64_t timestamp, const struct ppm_event_entry *event_table)
 {
 	int next;
 	uint32_t head;
@@ -211,7 +211,7 @@ int fire_event(uint64_t *context, uint16_t event_id, uint64_t timestamp)
 	args.enforce_snaplen = false;
 	args.is_socketcall = false;
 
-	const struct ppm_event_entry *pe = &g_ppm_events[hdr->type];
+	const struct ppm_event_entry *pe = &event_table[hdr->type];
 	int cbres = pe->filler_callback(&args);
 
 	// retrieve the next chunck starting point
