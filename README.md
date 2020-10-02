@@ -145,3 +145,7 @@ the final pointer.
 ## Protocol layout
 
 TODO
+
+
+## Notes
+val_to_ring can't be used as is because it uses the global `g_event_info` table

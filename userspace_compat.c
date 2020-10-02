@@ -31,7 +31,6 @@
 
 #include "userspace_compat.h"
 
-extern const struct ppm_event_info g_event_info[];
 extern const enum ppm_syscall_code g_syscall_code_routing_table[];
 
 // Ring buffer status
@@ -137,7 +136,7 @@ void syscall_get_arguments_deprecated(void *task, uint64_t *regs,
 int udig_proc_startupdate(struct event_filler_arguments *args) { return 0; }
 
 // Fire event facility
-int fire_event(uint64_t *context, uint16_t event_id, uint64_t timestamp, const struct ppm_event_entry *event_table)
+int fire_event(uint64_t *context, uint16_t event_id, uint64_t timestamp, const struct ppm_event_entry *event_table, const struct ppm_event_info *l_event_info_table)
 {
 	int next;
 	uint32_t head;
@@ -182,7 +181,7 @@ int fire_event(uint64_t *context, uint16_t event_id, uint64_t timestamp, const s
 	struct event_filler_arguments args;
 
 	// number of arguments for this event
-	args.nargs = g_event_info[hdr->type].nparams;
+	args.nargs = l_event_info_table[hdr->type].nparams;
 	args.arg_data_offset = args.nargs * sizeof(u16);
 
 	hdr->nparams = args.nargs;

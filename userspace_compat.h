@@ -18,6 +18,6 @@
 
 int userspace_init();
 int fire_event(uint64_t context[CTX_SIZE], uint16_t event_id,
-	       uint64_t timestamp, const struct ppm_event_entry *event_table);
+	       uint64_t timestamp, const struct ppm_event_entry *event_table, const struct ppm_event_info *l_event_info_table);
 
 #endif // USERSPACE_COMPAT_H
